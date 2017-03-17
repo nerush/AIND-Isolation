@@ -7,6 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+from imp import load_module
 
 
 class Timeout(Exception):
@@ -37,8 +38,7 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    return len(game.get_legal_moves(player))
 
 
 class CustomPlayer:
@@ -116,9 +116,9 @@ class CustomPlayer:
             (-1, -1) if there are no available legal moves.
         """
 
-        self.time_left = time_left
 
-        # TODO: finish this function!
+
+        self.time_left = time_left
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -136,7 +136,8 @@ class CustomPlayer:
             pass
 
         # Return the best move from the last completed search iteration
-        raise NotImplementedError
+        score, move = self.minimax(game, 1)
+        return move
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
@@ -172,8 +173,14 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        legal_moves = game.get_legal_moves(game.active_player)
+
+        if len(legal_moves) < 1:
+            return 0, (-1, -1)
+        else:
+            scores = [self.score(game.forecast_move(move), game.active_player) for move in legal_moves]
+            zipped = zip(scores, legal_moves)
+            return max(zipped)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
