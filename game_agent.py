@@ -7,6 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+import sys
 from imp import load_module
 
 
@@ -132,19 +133,29 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
+        # TODO: add opening book logic here
+        move = (-1, -1)
+        if len(legal_moves) < 1:
+            return move
+
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            pass
+            if self.iterative:
+                for depth in range(0, sys.maxsize):
+                    _, best_move = self.minimax(game, depth)
+                    if best_move != (-1, -1):
+                        move = best_move
+            else:
+                _, move = self.minimax(game, 1)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-        score, move = self.minimax(game, 1)
         return move
 
     def minimax(self, game, depth, maximizing_player=True):
