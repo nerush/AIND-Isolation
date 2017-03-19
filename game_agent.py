@@ -186,23 +186,23 @@ class CustomPlayer:
         else:
             child_nodes = game.get_legal_moves(game.active_player)
             if maximizing_player:
-                global_max = float("-inf")
+                global_min = float("-inf")
                 global_move = (-1, -1)
                 for child in child_nodes:
-                    local_max, _ = self.minimax(game.forecast_move(child), depth - 1, False)
-                    if local_max > global_max:
-                        global_max = local_max
-                        global_move = child
-                return global_max, global_move
-            else:
-                global_min = float("+inf")
-                global_move = (-1, -1)
-                for child in child_nodes:
-                    local_min, local_move = self.minimax(game.forecast_move(child), depth - 1, True)
-                    if local_min < global_min:
+                    local_min, _ = self.minimax(game.forecast_move(child), depth - 1, False)
+                    if local_min > global_min:
                         global_min = local_min
                         global_move = child
                 return global_min, global_move
+            else:
+                global_max = float("+inf")
+                global_move = (-1, -1)
+                for child in child_nodes:
+                    local_max, _ = self.minimax(game.forecast_move(child), depth - 1, True)
+                    if local_max < global_max:
+                        global_max = local_max
+                        global_move = child
+                return global_max, global_move
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
@@ -246,5 +246,31 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if depth == 0 or len(game.get_legal_moves(game.active_player)) == 0:
+            return self.score(game, self), (-1, -1)
+        else:
+            child_nodes = game.get_legal_moves(game.active_player)
+            if maximizing_player:
+                global_min = float("-inf")
+                global_move = (-1, -1)
+                for child in child_nodes:
+                    local_min, _ = self.alphabeta(game.forecast_move(child), depth - 1, alpha, beta, False)
+                    if local_min > global_min:
+                        global_min = local_min
+                        global_move = child
+                    alpha = max(alpha, global_min)
+                    if beta <= alpha:
+                        break
+                return global_min, global_move
+            else:
+                global_max = float("+inf")
+                global_move = (-1, -1)
+                for child in child_nodes:
+                    local_max, _ = self.alphabeta(game.forecast_move(child), depth - 1,alpha, beta,  True)
+                    if local_max < global_max:
+                        global_max = local_max
+                        global_move = child
+                    beta = min(beta, global_max)
+                    if beta <= alpha:
+                        break
+                return global_max, global_move
