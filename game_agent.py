@@ -38,16 +38,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # apply score difference heuristic function
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    return float(len(game.get_legal_moves(player)))
 
 
 class CustomPlayer:
@@ -133,7 +130,9 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
-        # TODO: add opening book logic here
+        # if len(game.get_blank_spaces()) == game.width * game.height:
+        #     return int(game.width/2), int(game.height/2)
+
         move = (-1, -1)
         if len(legal_moves) < 1:
             return move
@@ -143,13 +142,16 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
+
             if self.iterative:
-                for depth in range(0, sys.maxsize):
-                    _, best_move = self.minimax(game, depth)
-                    if best_move != (-1, -1):
+                score = 0
+                for depth in range(1, sys.maxsize):
+                    best_score, best_move = self.search(game, depth)
+                    if best_score >= score and best_move != (-1, -1):
+                        score = best_score
                         move = best_move
             else:
-                _, move = self.minimax(game, 1)
+                _, move = self.search(game, 1)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -157,6 +159,12 @@ class CustomPlayer:
 
         # Return the best move from the last completed search iteration
         return move
+
+    def search(self, game, depth):
+        if self.method == 'minimax':
+            return self.minimax(game, depth)
+        else:
+            return self.alphabeta(game, depth)
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
