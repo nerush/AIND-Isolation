@@ -108,6 +108,25 @@ def improved_score(game, player):
 
 
 def deep_score(game, player):
+    """Deep score has almost the same strategy as improved score: it calculates
+    difference between current legal moves and legal moves of one level deep forecasted states.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
     if game.is_loser(player):
         return float("-inf")
 
