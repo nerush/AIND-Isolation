@@ -107,6 +107,27 @@ def improved_score(game, player):
     return float(own_moves - opp_moves)
 
 
+def deep_score(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = game.get_legal_moves(player)
+    opp_moves = game.get_legal_moves(game.get_opponent(player))
+
+    own_count = len(own_moves)
+    for move in own_moves:
+        own_count += len(game.forecast_move(move).get_legal_moves(player))*2
+
+    opp_count = len(opp_moves)
+    for move in opp_moves:
+        opp_count += len(game.forecast_move(move).get_legal_moves(game.get_opponent(player)))*2
+
+    return float(own_count - opp_count)
+
+
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -130,7 +151,7 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    return open_move_score(game, player)
+    return improved_score(game, player)
 
 
 class CustomPlayer:
@@ -230,8 +251,10 @@ class CustomPlayer:
             # when the timer gets close to expiring
 
             if self.iterative:
-                score = 0
-                for depth in range(1, sys.maxsize):
+                score = float("-inf")
+                depth = 0
+                while True:
+                    depth += 1
                     best_score, best_move = self.search(game, depth)
                     if best_score >= score and best_move != (-1, -1):
                         score = best_score
